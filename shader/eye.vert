@@ -1,6 +1,6 @@
-
+ï»¿
 void main(){
-    vec3 npos=normalize(gl_Vertex.xyz);//µãµÄ³¯ÏòÊ¸Á¿
+    vec3 npos=normalize(gl_Vertex.xyz);//ç‚¹çš„æœå‘çŸ¢é‡
     vec2 px=npos.xz;
     float sinthita=length(px);
     px=normalize(px);

@@ -1,0 +1,7 @@
+.vs/
+Debug/
+Release/
+.vscode/
+
+# macOS
+.DS_Store

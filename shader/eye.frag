@@ -1,8 +1,9 @@
 
 uniform sampler2D color_texture;
 uniform sampler2D two_texture;
+
 void main (void){
-     //ÎÆÀí×ø±êÒÑ¾­ÔÚ¶¥µã×ÅÉ«Æ÷ÖĞ´æµ½ÎÆÀí¾ØÕóÀï£¬ÕâÀï½«ÎÆÀí×ø±êÓëÎÆÀíÍ¼Æ¬½áºÏ¾Í¿ÉÒÔÁË
+     //çº¹ç†åæ ‡å·²ç»åœ¨é¡¶ç‚¹ç€è‰²å™¨ä¸­å­˜åˆ°çº¹ç†çŸ©é˜µé‡Œï¼Œè¿™é‡Œå°†çº¹ç†åæ ‡ä¸çº¹ç†å›¾ç‰‡ç»“åˆå°±å¯ä»¥äº†
     vec4 color1 = texture(color_texture,gl_TexCoord[0].st);
     vec4 color2 = texture( two_texture ,gl_TexCoord[1].st);
 	gl_FragColor = color1 + color2;

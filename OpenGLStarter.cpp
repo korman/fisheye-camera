@@ -4,73 +4,73 @@
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include <GL/glaux.h>
-#include<iostream>  
+#include <iostream>
 
 using namespace std;
 void display();
 #pragma comment(lib, "glew32.lib")
 #pragma comment(lib, "glaux.lib")
 
-//¶¨ÒåÊä³ö´°¿ÚµÄ´óĞ¡
+// å®šä¹‰è¾“å‡ºçª—å£çš„å¤§å°
 #define WINDOW_HEIGHT 720
-#define WINDOW_WIDTH  1280
-//z×ÅÉ«Æ÷¾ä±ú
+#define WINDOW_WIDTH 1280
+// zç€è‰²å™¨å¥æŸ„
 GLuint G_vShader_simple;
 GLuint G_fShader_simple;
 GLuint G_shaderProgram;
 
-static GLuint G_texNameArray[2];//ÎÆÀí
-GLdouble eqn[4] = {0.0,0.0,1.0,0.0};//°ëÇòÇĞÆ¬
+static GLuint G_texNameArray[2];		// çº¹ç†
+GLdouble eqn[4] = {0.0, 0.0, 1.0, 0.0}; // åŠçƒåˆ‡ç‰‡
 /****************************************************************************************/
-#define LOAD_RGB24   0
-#define LOAD_BGR24   0
-#define LOAD_BGRA    0
-#define LOAD_YUV420P 1          //¶ÁÈ¡µÄ¸ñÊ½Ñ¡Ôñ£¬
+#define LOAD_RGB24 0
+#define LOAD_BGR24 0
+#define LOAD_BGRA 0
+#define LOAD_YUV420P 1 // è¯»å–çš„æ ¼å¼é€‰æ‹©ï¼Œ
 
-const int pixel_w = 1440, pixel_h =1080 ;   //ÊÓÆµµÄ·Ö±æÂÊ
+const int pixel_w = 1440, pixel_h = 1080; // è§†é¢‘çš„åˆ†è¾¨ç‡
 /*******************************************************************************************/
-//Ã¿¸öÏñËØµÄbit
+// æ¯ä¸ªåƒç´ çš„bit
 #if LOAD_BGRA
-const int bpp=32;
-#elif LOAD_RGB24|LOAD_BGR24
-const int bpp=24;
+const int bpp = 32;
+#elif LOAD_RGB24 | LOAD_BGR24
+const int bpp = 24;
 #elif LOAD_YUV420P
-const int bpp=12;
+const int bpp = 12;
 #endif
-//YUV file
+// YUV file
 FILE *fp = NULL;
-unsigned char buffer[pixel_w*pixel_h*bpp/8];
-unsigned char buffer_convert[pixel_w*pixel_h*3];
+unsigned char buffer[pixel_w * pixel_h * bpp / 8];
+unsigned char buffer_convert[pixel_w * pixel_h * 3];
 
 inline unsigned char CONVERT_ADJUST(double tmp)
 {
-	return (unsigned char)((tmp >= 0 && tmp <= 255)?tmp:(tmp < 0 ? 0 : 255));
+	return (unsigned char)((tmp >= 0 && tmp <= 255) ? tmp : (tmp < 0 ? 0 : 255));
 }
-//YUV420P to RGB24
-void CONVERT_YUV420PtoRGB24(unsigned char* yuv_src,unsigned char* rgb_dst,int nWidth,int nHeight)
+// YUV420P to RGB24
+void CONVERT_YUV420PtoRGB24(unsigned char *yuv_src, unsigned char *rgb_dst, int nWidth, int nHeight)
 {
-	unsigned char *tmpbuf=(unsigned char *)malloc(nWidth*nHeight*3);
-	unsigned char Y,U,V,R,G,B;
-	unsigned char* y_planar,*u_planar,*v_planar;
-	int rgb_width , u_width;
+	unsigned char *tmpbuf = (unsigned char *)malloc(nWidth * nHeight * 3);
+	unsigned char Y, U, V, R, G, B;
+	unsigned char *y_planar, *u_planar, *v_planar;
+	int rgb_width, u_width;
 	rgb_width = nWidth * 3;
 	u_width = (nWidth >> 1);
 	int ypSize = nWidth * nHeight;
-	int upSize = (ypSize>>2);
+	int upSize = (ypSize >> 2);
 	int offSet = 0;
 
 	y_planar = yuv_src;
 	u_planar = yuv_src + ypSize;
 	v_planar = u_planar + upSize;
 
-	for(int i = 0; i < nHeight; i++)
+	for (int i = 0; i < nHeight; i++)
 	{
-		for(int j = 0; j < nWidth; j ++)
+		for (int j = 0; j < nWidth; j++)
 		{
 			// Get the Y value from the y planar
 			Y = *(y_planar + nWidth * i + j);
 			// Get the V value from the u planar
-			offSet = (i>>1) * (u_width) + (j>>1);
+			offSet = (i >> 1) * (u_width) + (j >> 1);
 			V = *(u_planar + offSet);
 			// Get the U value from the v planar
 			U = *(v_planar + offSet);
@@ -90,9 +90,9 @@ void CONVERT_YUV420PtoRGB24(unsigned char* yuv_src,unsigned char* rgb_dst,int nW
 			R = CONVERT_ADJUST(( 298 * C + 409 * E + 128) >> 8);
 			G = CONVERT_ADJUST(( 298 * C - 100 * D - 208 * E + 128) >> 8);
 			B = CONVERT_ADJUST(( 298 * C + 516 * D + 128) >> 8);
-			R = ((R - 128) * .6 + 128 )>255?255:(R - 128) * .6 + 128; 
-			G = ((G - 128) * .6 + 128 )>255?255:(G - 128) * .6 + 128; 
-			B = ((B - 128) * .6 + 128 )>255?255:(B - 128) * .6 + 128; 
+			R = ((R - 128) * .6 + 128 )>255?255:(R - 128) * .6 + 128;
+			G = ((G - 128) * .6 + 128 )>255?255:(G - 128) * .6 + 128;
+			B = ((B - 128) * .6 + 128 )>255?255:(B - 128) * .6 + 128;
 			*/
 			offSet = rgb_width * i + j * 3;
 
@@ -103,32 +103,33 @@ void CONVERT_YUV420PtoRGB24(unsigned char* yuv_src,unsigned char* rgb_dst,int nW
 	}
 	free(tmpbuf);
 }
-void timeFunc(int value){
-    display();
-    glutTimerFunc(1, timeFunc, 0);//Ö¡ÂÊÉèÖÃ
+void timeFunc(int value)
+{
+	display();
+	glutTimerFunc(1, timeFunc, 0); // å¸§ç‡è®¾ç½®
 }
 
 /**************************************************************************************************/
 
-//ÉãÏñ»úÀëÎïÌåµÄ¾àÀë
+// æ‘„åƒæœºç¦»ç‰©ä½“çš„è·ç¦»
 float G_fDistance = 10.0f;
 float G_RLDistance = -0.0f;
 float G_UDDistance = -0.0f;
-//ÎïÌåµÄĞı×ª½Ç¶È 
-float G_fAngle_horizon =180.0;
-float G_fAngle_vertical =90.0f;
-float G_scale =2.0f;
+// ç‰©ä½“çš„æ—‹è½¬è§’åº¦
+float G_fAngle_horizon = 180.0;
+float G_fAngle_vertical = 90.0f;
+float G_scale = 2.0f;
 
-//¹âÕÕ²ÎÊı
-//float G_vLit0Position[4] = { 5.0f, 5.0f, 5.0f, 1.0f };
-//float G_vLit0Ambient[4] = { 0.3f, 0.3f, 0.3f, 1.0f };
-//float G_vLit0Diffuse[4] = { 0.3f, 0.3f, 0.3f, 1.0f };
-//float G_vLit0Specular[4] = { 0.6f, 0.6f, 0.6f, 1.0f };
+// å…‰ç…§å‚æ•°
+// float G_vLit0Position[4] = { 5.0f, 5.0f, 5.0f, 1.0f };
+// float G_vLit0Ambient[4] = { 0.3f, 0.3f, 0.3f, 1.0f };
+// float G_vLit0Diffuse[4] = { 0.3f, 0.3f, 0.3f, 1.0f };
+// float G_vLit0Specular[4] = { 0.6f, 0.6f, 0.6f, 1.0f };
 //
-//float G_vMaterialAmbient[4] = { 0.0f, 0.8f, 0.0f, 1.0f };
-//float G_vMaterialDiffuse[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
-//float G_vMaterialSpecular[4] = { 0.8f, 0.8f, 0.8f, 1.0f };
-//float G_iShininess = 50;
+// float G_vMaterialAmbient[4] = { 0.0f, 0.8f, 0.0f, 1.0f };
+// float G_vMaterialDiffuse[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
+// float G_vMaterialSpecular[4] = { 0.8f, 0.8f, 0.8f, 1.0f };
+// float G_iShininess = 50;
 
 ////////////////////////////////////////////////
 void myinit(void);
@@ -137,195 +138,192 @@ void display(void);
 void setShaders(void);
 void printShaderInfoLog(GLuint shaderObject);
 void printProgramInfoLog(GLuint programObject);
-char* textFileRead(const char *textFileName);
+char *textFileRead(const char *textFileName);
 
-
-//ÏìÓ¦¼üÅÌÊäÈë, ´Ó¶øÉè¶¨ÎïÌåÒÆ½üÒÆÔ¶ÒÔ¼°Ğı×ªµÄ»Øµ÷º¯Êı
+// å“åº”é”®ç›˜è¾“å…¥, ä»è€Œè®¾å®šç‰©ä½“ç§»è¿‘ç§»è¿œä»¥åŠæ—‹è½¬çš„å›è°ƒå‡½æ•°
 void processSpecialKeys(int key, int x, int y);
-void processNormalKeys(unsigned char key,int x,int y);
-
+void processNormalKeys(unsigned char key, int x, int y);
 
 ////////////////////////////////////////////////
-//Ö÷º¯Êı
-int main(int argc, char* argv[])
-{ 
+// ä¸»å‡½æ•°
+int main(int argc, char *argv[])
+{
 #if LOAD_BGRA
-	fp=fopen("./Face2.avi","rb+");
+	fp = fopen("./Face2.avi", "rb+");
 #elif LOAD_RGB24
-	fp=fopen("./test.mov","rb+");
+	fp = fopen("./test.mov", "rb+");
 #elif LOAD_BGR24
-	fp=fopen("./face2.avi","rb+");
+	fp = fopen("./face2.avi", "rb+");
 #elif LOAD_YUV420P
-	fp=fopen("./output.yuv","rb+");
+	fp = fopen("./output.yuv", "rb+");
 #endif
-	if(fp==NULL){
+	if (fp == NULL)
+	{
 		printf("Cannot open this file.\n");
 		return -1;
 	}
-	//Mat img = imread("../test.jpg",1);
+	// Mat img = imread("../test.jpg",1);
 	glutInit(&argc, argv);
 
-	//³õÊ¼»¯OPENGLÏÔÊ¾·½Ê½
-	glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGBA);
-	//glutInitDisplayMode (GLUT_SINGLE | GLUT_RGBA);
+	// åˆå§‹åŒ–OPENGLæ˜¾ç¤ºæ–¹å¼
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
+	// glutInitDisplayMode (GLUT_SINGLE | GLUT_RGBA);
 
-	//Éè¶¨OPENGL´°¿ÚÎ»ÖÃºÍ´óĞ¡
-	glutInitWindowSize (WINDOW_WIDTH, WINDOW_HEIGHT); 
-	glutInitWindowPosition (0, 0);
-		
-	//´ò¿ª´°¿Ú
+	// è®¾å®šOPENGLçª—å£ä½ç½®å’Œå¤§å°
+	glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+	glutInitWindowPosition(0, 0);
+
+	// æ‰“å¼€çª—å£
 	glutCreateWindow("Simplest Video Play OpenGL");
 
-	printf("ADWSÉÏÏÂ×óÓÒÒÆ¶¯£¬ ·½Ïò¼üÊÇÑ¡×°£¬QEZX·Å´óËõĞ¡\n");
+	printf("ADWSä¸Šä¸‹å·¦å³ç§»åŠ¨ï¼Œ æ–¹å‘é”®æ˜¯é€‰è£…ï¼ŒQEZXæ”¾å¤§ç¼©å°\n");
 
-	//µ÷ÓÃ³õÊ¼»¯º¯Êı
-    myinit();
-	//loadTexImages();
+	// è°ƒç”¨åˆå§‹åŒ–å‡½æ•°
+	myinit();
+	// loadTexImages();
 	setShaders();
-	//Éè¶¨´°¿Ú´óĞ¡±ä»¯µÄ»Øµ÷º¯Êı
+	// è®¾å®šçª—å£å¤§å°å˜åŒ–çš„å›è°ƒå‡½æ•°
 	glutReshapeFunc(myReshape);
 
-	//Éè¶¨¼üÅÌ¿ØÖÆµÄ»Øµ÷º¯Êı
+	// è®¾å®šé”®ç›˜æ§åˆ¶çš„å›è°ƒå‡½æ•°
 	glutSpecialFunc(processSpecialKeys);
 	glutKeyboardFunc(processNormalKeys);
-	//¿ªÊ¼OPENGLµÄÑ­»·
-	glutDisplayFunc(display); 
-	//glutDisplayFuncº¯ÊıÓÃÓÚ×¢²áÒ»¸ö»æÍ¼º¯Êı£¬ ÕâÑù²Ù×÷ÏµÍ³ÔÚ±ØÒªÊ±¿Ì¾Í»á¶Ô´°Ìå½øĞĞÖØĞÂ»æÖÆ²Ù×÷¡£ÀàËÆÓÚwindows³ÌĞòÉè¼ÆÖĞ´¦ÀíWM_PAINTÏûÏ¢¡£¾ßÌåÀ´ËµÄØ£¬¾ÍÊÇÉèÖÃÒ»¸öº¯Êıµ±ĞèÒª½øĞĞ»­Í¼Ê±¾Íµ÷ÓÃÕâ¸öº¯ÊıÈç£º glutDisplayFunc(display);
+	// å¼€å§‹OPENGLçš„å¾ªç¯
+	glutDisplayFunc(display);
+	// glutDisplayFuncå‡½æ•°ç”¨äºæ³¨å†Œä¸€ä¸ªç»˜å›¾å‡½æ•°ï¼Œ è¿™æ ·æ“ä½œç³»ç»Ÿåœ¨å¿…è¦æ—¶åˆ»å°±ä¼šå¯¹çª—ä½“è¿›è¡Œé‡æ–°ç»˜åˆ¶æ“ä½œã€‚ç±»ä¼¼äºwindowsç¨‹åºè®¾è®¡ä¸­å¤„ç†WM_PAINTæ¶ˆæ¯ã€‚å…·ä½“æ¥è¯´å‘¢ï¼Œå°±æ˜¯è®¾ç½®ä¸€ä¸ªå‡½æ•°å½“éœ€è¦è¿›è¡Œç”»å›¾æ—¶å°±è°ƒç”¨è¿™ä¸ªå‡½æ•°å¦‚ï¼š glutDisplayFunc(display);
 
-	//glutIdleFunc(display);//glutIdleFuncÉèÖÃÈ«¾ÖµÄ»Øµ÷º¯Êı£¬µ±Ã»ÓĞ´°¿ÚÊÂ¼şµ½´ïÊ±£¬GLUT³ÌĞò¹¦ÄÜ¿ÉÒÔÖ´ĞĞºóÌ¨´¦ÀíÈÎÎñ»òÁ¬Ğø¶¯»­¡£Èç¹ûÆôÓÃ£¬Õâ¸öidle function»á±»²»¶Ïµ÷ÓÃ£¬Ö±µ½ÓĞ´°¿ÚÊÂ¼ş·¢Éú¡£
+	// glutIdleFunc(display);//glutIdleFuncè®¾ç½®å…¨å±€çš„å›è°ƒå‡½æ•°ï¼Œå½“æ²¡æœ‰çª—å£äº‹ä»¶åˆ°è¾¾æ—¶ï¼ŒGLUTç¨‹åºåŠŸèƒ½å¯ä»¥æ‰§è¡Œåå°å¤„ç†ä»»åŠ¡æˆ–è¿ç»­åŠ¨ç”»ã€‚å¦‚æœå¯ç”¨ï¼Œè¿™ä¸ªidle functionä¼šè¢«ä¸æ–­è°ƒç”¨ï¼Œç›´åˆ°æœ‰çª—å£äº‹ä»¶å‘ç”Ÿã€‚
 
-	glutTimerFunc(100, timeFunc, 0); //Ö¡ÂÊ
-	glutMainLoop();//glutMainLoop½øÈëGLUTÊÂ¼ş´¦ÀíÑ­»·£¬ÈÃËùÓĞµÄÓë¡°ÊÂ¼ş¡±ÓĞ¹ØµÄº¯Êıµ÷ÓÃÎŞÏŞÑ­»·¡£
+	glutTimerFunc(100, timeFunc, 0); // å¸§ç‡
+	glutMainLoop();					 // glutMainLoopè¿›å…¥GLUTäº‹ä»¶å¤„ç†å¾ªç¯ï¼Œè®©æ‰€æœ‰çš„ä¸â€œäº‹ä»¶â€æœ‰å…³çš„å‡½æ•°è°ƒç”¨æ— é™å¾ªç¯ã€‚
 
 	return 0;
 }
 
 ////////////////////////////////////////////////
-//ÓÃ»§³õÊ¼»¯º¯Êı
+// ç”¨æˆ·åˆå§‹åŒ–å‡½æ•°
 void myinit(void)
 {
-    //your initialization code
+	// your initialization code
 	glEnable(GL_DEPTH_TEST);
 
 	/*glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);*/
-//	glEnable(GL_COLOR_MATERIAL);
-//	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+	//	glEnable(GL_COLOR_MATERIAL);
+	//	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 
-	GLenum err = glewInit();   
-	if (GLEW_OK != err)   
-	{   
+	GLenum err = glewInit();
+	if (GLEW_OK != err)
+	{
 		printf("glew initionlize error: %s\n", glewGetErrorString(err));
 	}
 	if (GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader)
 		printf("Ready for GLSL\n");
-	else {
+	else
+	{
 		printf("Not totally ready \n");
 		exit(1);
 	}
 
 	if (glewIsSupported("GL_VERSION_2_0"))
 		printf("Ready for OpenGL 2.0\n");
-	else 
-	{ 
-		printf("OpenGL 2.0 not supported\n"); 
+	else
+	{
+		printf("OpenGL 2.0 not supported\n");
 		exit(1);
 	}
-
 }
 
-//´°¿Ú´óĞ¡±ä»¯Ê±µÄ»Øµ÷º¯Êı
-void myReshape(GLsizei w, GLsizei h)//Í¸ÊÓÍ¶Ó°
+// çª—å£å¤§å°å˜åŒ–æ—¶çš„å›è°ƒå‡½æ•°
+void myReshape(GLsizei w, GLsizei h) // é€è§†æŠ•å½±
 {
-	//Éè¶¨ÊÓÇø
-    glViewport(0, 0, w, h);
+	// è®¾å®šè§†åŒº
+	glViewport(0, 0, w, h);
 
-	//Éè¶¨Í¸ÊÓ·½Ê½
-    glMatrixMode(GL_PROJECTION);//GL_MODELVIEW ÊÇÄ£ĞÍ¾ØÕóGL_PROJECTION ÊÇÍ¶Ó°¾ØÕó
-    glLoadIdentity();
-    gluPerspective(60.0, 1.0*(GLfloat)w/(GLfloat)h, 1.0, 300.0);
-//	gluPerspective(60.0, 1.0, 1.0, 30.0);
- // glFrustum (-1.0, 1.0, -1.0, 1.0, 1.0, 30.0);
+	// è®¾å®šé€è§†æ–¹å¼
+	glMatrixMode(GL_PROJECTION); // GL_MODELVIEW æ˜¯æ¨¡å‹çŸ©é˜µGL_PROJECTION æ˜¯æŠ•å½±çŸ©é˜µ
+	glLoadIdentity();
+	gluPerspective(60.0, 1.0 * (GLfloat)w / (GLfloat)h, 1.0, 300.0);
+	//	gluPerspective(60.0, 1.0, 1.0, 30.0);
+	// glFrustum (-1.0, 1.0, -1.0, 1.0, 1.0, 30.0);
 }
 
-//Ã¿èåOpenGL¶¼»áµ÷ÓÃÕâ¸öº¯Êı£¬ÓÃ»§Ó¦¸Ã°ÑÏÔÊ¾´úÂë·ÅÔÚÕâ¸öº¯ÊıÖĞ
+// æ¯æ¡¢OpenGLéƒ½ä¼šè°ƒç”¨è¿™ä¸ªå‡½æ•°ï¼Œç”¨æˆ·åº”è¯¥æŠŠæ˜¾ç¤ºä»£ç æ”¾åœ¨è¿™ä¸ªå‡½æ•°ä¸­
 void display(void)
 {
-	//ÉèÖÃÇå³ıÆÁÄ»µÄÑÕÉ«£¬²¢Çå³ıÆÁÄ»ºÍÉî¶È»º³å
+	// è®¾ç½®æ¸…é™¤å±å¹•çš„é¢œè‰²ï¼Œå¹¶æ¸…é™¤å±å¹•å’Œæ·±åº¦ç¼“å†²
 	glGenTextures(1, G_texNameArray);
-    
-   
-    if (fread(buffer, 1, pixel_w*pixel_h*bpp/8, fp) != pixel_w*pixel_h*bpp/8){
-        // Loop
-        fseek(fp, 0, SEEK_SET);//
-        fread(buffer, 1, pixel_w*pixel_h*bpp/8, fp);
-    }
 
+	if (fread(buffer, 1, pixel_w * pixel_h * bpp / 8, fp) != pixel_w * pixel_h * bpp / 8)
+	{
+		// Loop
+		fseek(fp, 0, SEEK_SET); //
+		fread(buffer, 1, pixel_w * pixel_h * bpp / 8, fp);
+	}
 
 #if LOAD_BGRA
-		glBindTexture(GL_TEXTURE_2D, G_texNameArray[0]);
-		gluBuild2DMipmaps(GL_TEXTURE_2D, 3, pixel_w , pixel_h,GL_BGRA, GL_UNSIGNED_BYTE, buffer);
+	glBindTexture(GL_TEXTURE_2D, G_texNameArray[0]);
+	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, pixel_w, pixel_h, GL_BGRA, GL_UNSIGNED_BYTE, buffer);
 #elif LOAD_RGB24
 	glBindTexture(GL_TEXTURE_2D, G_texNameArray[0]);
-	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, pixel_w ,pixel_h, GL_RGB, GL_UNSIGNED_BYTE, buffer);
+	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, pixel_w, pixel_h, GL_RGB, GL_UNSIGNED_BYTE, buffer);
 #elif LOAD_BGR24
 	glBindTexture(GL_TEXTURE_2D, G_texNameArray[0]);
-	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, pixel_w ,pixel_h, GL_BGR_EXT, GL_UNSIGNED_BYTE, buffer);
+	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, pixel_w, pixel_h, GL_BGR_EXT, GL_UNSIGNED_BYTE, buffer);
 #elif LOAD_YUV420P
-	CONVERT_YUV420PtoRGB24(buffer,buffer_convert,pixel_w,pixel_h);
-		glBindTexture(GL_TEXTURE_2D, G_texNameArray[0]);
-		gluBuild2DMipmaps(GL_TEXTURE_2D, 3, pixel_w , pixel_h, GL_RGB, GL_UNSIGNED_BYTE,buffer_convert);
+	CONVERT_YUV420PtoRGB24(buffer, buffer_convert, pixel_w, pixel_h);
+	glBindTexture(GL_TEXTURE_2D, G_texNameArray[0]);
+	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, pixel_w, pixel_h, GL_RGB, GL_UNSIGNED_BYTE, buffer_convert);
 
 #endif
 
-    glClearColor(1.0f,1.0f,1.0f,0.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+	glLoadIdentity();
 
-    glTranslatef(G_RLDistance, G_UDDistance, -G_fDistance);
+	glTranslatef(G_RLDistance, G_UDDistance, -G_fDistance);
 	glRotatef(G_fAngle_horizon, 0.0f, 1.0f, 0.0f);
 	glRotatef(G_fAngle_vertical, 1.0f, 0.0f, 0.0f);
 
 	////////////////////////////////////////////////
-	glClipPlane(GL_CLIP_PLANE0,eqn);
-	/*void glClipPlane(GLenum plane, const GLdouble *equation); 
-    ¶¨ÒåÒ»¸ö²Ã¼ôÆ½Ãæ¡£equation²ÎÊıÖ¸ÏòÆ½Ãæ·½³ÌAx + By + Cz + D = 0µÄ4¸öÏµÊı¡£
-	equation=£¨0£¬-1£¬0,0£©£¬Ç°Èı¸ö²ÎÊı£¨0£¬-1,0£©¿ÉÒÔÀí½âÎª·¨ÏßÏòÏÂ£¬Ö»ÓĞÏòÏÂµÄ£¬
-	¼´Y<0µÄ²ÅÄÜÏÔÊ¾£¬×îºóÒ»¸ö²ÎÊı0±íÊ¾´Óz=0Æ½Ãæ¿ªÊ¼¡£ÕâÑù¾ÍÊÇ²Ã¼ôµôÉÏ°ëÆ½Ãæ¡£
-	ÏàÓ¦µÄequation=£¨0,1,0,0£©±íÊ¾²Ã¼ôµôÏÂ°ëÆ½Ãæ£¬equation=£¨1,0,0,0£©±íÊ¾²Ã¼ôµô×ó°ëÆ½Ãæ£¬
-	equation=£¨-1,0,0,0£©±íÊ¾²Ã¼ôµôÓÒ°ëÆ½Ãæ£¬
-	equation=£¨0,0,-1,0£©±íÊ¾²Ã¼ôµôÇ°°ëÆ½Ãæ£¬equation=£¨0,0,1,0£©±íÊ¾²Ã¼ôµôºó°ëÆ½Ãæ*/
+	glClipPlane(GL_CLIP_PLANE0, eqn);
+	/*void glClipPlane(GLenum plane, const GLdouble *equation);
+	å®šä¹‰ä¸€ä¸ªè£å‰ªå¹³é¢ã€‚equationå‚æ•°æŒ‡å‘å¹³é¢æ–¹ç¨‹Ax + By + Cz + D = 0çš„4ä¸ªç³»æ•°ã€‚
+	equation=ï¼ˆ0ï¼Œ-1ï¼Œ0,0ï¼‰ï¼Œå‰ä¸‰ä¸ªå‚æ•°ï¼ˆ0ï¼Œ-1,0ï¼‰å¯ä»¥ç†è§£ä¸ºæ³•çº¿å‘ä¸‹ï¼Œåªæœ‰å‘ä¸‹çš„ï¼Œ
+	å³Y<0çš„æ‰èƒ½æ˜¾ç¤ºï¼Œæœ€åä¸€ä¸ªå‚æ•°0è¡¨ç¤ºä»z=0å¹³é¢å¼€å§‹ã€‚è¿™æ ·å°±æ˜¯è£å‰ªæ‰ä¸ŠåŠå¹³é¢ã€‚
+	ç›¸åº”çš„equation=ï¼ˆ0,1,0,0ï¼‰è¡¨ç¤ºè£å‰ªæ‰ä¸‹åŠå¹³é¢ï¼Œequation=ï¼ˆ1,0,0,0ï¼‰è¡¨ç¤ºè£å‰ªæ‰å·¦åŠå¹³é¢ï¼Œ
+	equation=ï¼ˆ-1,0,0,0ï¼‰è¡¨ç¤ºè£å‰ªæ‰å³åŠå¹³é¢ï¼Œ
+	equation=ï¼ˆ0,0,-1,0ï¼‰è¡¨ç¤ºè£å‰ªæ‰å‰åŠå¹³é¢ï¼Œequation=ï¼ˆ0,0,1,0ï¼‰è¡¨ç¤ºè£å‰ªæ‰ååŠå¹³é¢*/
 	glEnable(GL_CLIP_PLANE0);
-	
+
 	glUseProgram(G_shaderProgram);
 	glActiveTexture(GL_TEXTURE0);
-	glEnable(GL_TEXTURE_2D);//OpenGl º¯Êı¡£ÓÃÓÚÆôÓÃ¸÷ÖÖ¹¦ÄÜ¡£¾ßÌå¹¦ÄÜÓÉ²ÎÊı¾ö¶¨¡£ÓëglDisableÏà¶ÔÓ¦¡£glDisableÓÃÒÔ¹Ø±Õ¸÷Ïî¹¦ÄÜ¡£
-	int texture_location = glGetUniformLocation(G_shaderProgram,"color_texture");
-	glUniform1i(texture_location, 0);//¶ÔÓ¦ÎÆÀíµÚÒ»²ã
+	glEnable(GL_TEXTURE_2D); // OpenGl å‡½æ•°ã€‚ç”¨äºå¯ç”¨å„ç§åŠŸèƒ½ã€‚å…·ä½“åŠŸèƒ½ç”±å‚æ•°å†³å®šã€‚ä¸glDisableç›¸å¯¹åº”ã€‚glDisableç”¨ä»¥å…³é—­å„é¡¹åŠŸèƒ½ã€‚
+	int texture_location = glGetUniformLocation(G_shaderProgram, "color_texture");
+	glUniform1i(texture_location, 0); // å¯¹åº”çº¹ç†ç¬¬ä¸€å±‚
 	glBindTexture(GL_TEXTURE_2D, G_texNameArray[0]);
-	glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	/* ¶ÔÓÚÌùÁËÎÆÀíµÄÄ£ĞÍ£¬¿ÉÒÔÊ¹ÓÃ glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE,XX)À´Ö¸¶¨ÎÆÀíÌùÍ¼ºÍ²ÄÖÊ»ìºÏµÄ·½Ê½£¬´Ó¶ø²úÉúÌØ¶¨µÄ»æÖÆĞ§¹û */
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	/* å¯¹äºè´´äº†çº¹ç†çš„æ¨¡å‹ï¼Œå¯ä»¥ä½¿ç”¨ glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE,XX)æ¥æŒ‡å®šçº¹ç†è´´å›¾å’Œæè´¨æ··åˆçš„æ–¹å¼ï¼Œä»è€Œäº§ç”Ÿç‰¹å®šçš„ç»˜åˆ¶æ•ˆæœ */
 
 	glActiveTexture(GL_TEXTURE1);
 	glEnable(GL_TEXTURE_2D);
-	int two_location = glGetUniformLocation(G_shaderProgram,"two_texture");
-    
-	glUniform1i(two_location, 1);//¶ÔÓ¦ÎÆÀíµÚ¶ş²ã
-	
+	int two_location = glGetUniformLocation(G_shaderProgram, "two_texture");
+
+	glUniform1i(two_location, 1); // å¯¹åº”çº¹ç†ç¬¬äºŒå±‚
 
 	/***********************************************************************************/
-	glutSolidSphere(G_scale,50,50);
-	glClipPlane(GL_CLIP_PLANE0,eqn);
+	glutSolidSphere(G_scale, 50, 50);
+	glClipPlane(GL_CLIP_PLANE0, eqn);
 	/***********************************************************************************/
-/*void glutSolidSphere(GLdouble radius , GLint slices , GLint stacks);
-radius
-ÇòÌåµÄ°ë¾¶
-slices
-ÒÔZÖáÉÏÏß¶ÎÎªÖ±¾¶·Ö²¼µÄÔ²ÖÜÏßµÄÌõÊı£¨½«ZÖá¿´³ÉµØÇòµÄµØÖá£¬ÀàËÆÓÚ¾­Ïß£©
-stacks
-Î§ÈÆÔÚZÖáÖÜÎ§µÄÏßµÄÌõÊı£¨ÀàËÆÓÚµØÇòÉÏÎ³Ïß£©
-Ò»°ã¶øÑÔ£¬ºóÁ½¸ö²ÎÊı¸³Óè½Ï´óµÄÖµ£¬äÖÈ¾»¨·ÑµÄÊ±¼äÒª³¤£¬Ğ§¹û¸ü±ÆÕæ¡£*/
+	/*void glutSolidSphere(GLdouble radius , GLint slices , GLint stacks);
+	radius
+	çƒä½“çš„åŠå¾„
+	slices
+	ä»¥Zè½´ä¸Šçº¿æ®µä¸ºç›´å¾„åˆ†å¸ƒçš„åœ†å‘¨çº¿çš„æ¡æ•°ï¼ˆå°†Zè½´çœ‹æˆåœ°çƒçš„åœ°è½´ï¼Œç±»ä¼¼äºç»çº¿ï¼‰
+	stacks
+	å›´ç»•åœ¨Zè½´å‘¨å›´çš„çº¿çš„æ¡æ•°ï¼ˆç±»ä¼¼äºåœ°çƒä¸Šçº¬çº¿ï¼‰
+	ä¸€èˆ¬è€Œè¨€ï¼Œåä¸¤ä¸ªå‚æ•°èµ‹äºˆè¾ƒå¤§çš„å€¼ï¼Œæ¸²æŸ“èŠ±è´¹çš„æ—¶é—´è¦é•¿ï¼Œæ•ˆæœæ›´é€¼çœŸã€‚*/
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDisable(GL_TEXTURE_2D);
@@ -334,202 +332,202 @@ stacks
 	glDisable(GL_TEXTURE_2D);
 	glUseProgram(0);
 	glDisable(GL_CLIP_PLANE0);
-                      
+
 	glutSwapBuffers();
 }
 
-void processSpecialKeys(int key, int x, int y)//ĞŞ¸Ä£¬ÏŞÖÆ½Ç¶È
-{ 
-	switch(key) {//ÉÏÏÂ×óÓÒĞı×ª
-		case GLUT_KEY_LEFT:
-			//if(G_fAngle_horizon>100.0)
-			G_fAngle_horizon -= 10.0f;
-			break;
-		case GLUT_KEY_RIGHT:
-			//if(G_fAngle_horizon<250.0)
-			G_fAngle_horizon += 10.0f;
-			break;
-		case GLUT_KEY_UP:
-			//if(G_fAngle_vertical>-160.0)
-			G_fAngle_vertical -= 10.0f;
-			break;
-		case GLUT_KEY_DOWN:
-			//if(G_fAngle_vertical<20.0)
-			G_fAngle_vertical += 10.0f;
-			break;
-	}
-	glutPostRedisplay();
-}
-
-void processNormalKeys(unsigned char key,int x,int y)
+void processSpecialKeys(int key, int x, int y) // ä¿®æ”¹ï¼Œé™åˆ¶è§’åº¦
 {
-	  if(G_fDistance<3)
-	{
-   if(250>G_fAngle_horizon&&G_fAngle_horizon>100.0)
-       G_fAngle_horizon=0;
-   if(-20>G_fAngle_vertical&&G_fAngle_vertical>-160)
-      G_fAngle_vertical=90;
-    }
-	switch(key) {
-		case 'q':	//Ô¶½ü
-			if(G_fDistance>-0.6)
-			G_fDistance -= 0.3f;
-			break;
-		case 'Q':	
-			if(G_fDistance>-0.6)
-			G_fDistance -= 0.3f;
-			break;
-		case 'e':
-		  if(G_fDistance>3)
-	{
-   if(250<G_fAngle_horizon||G_fAngle_horizon<100.0)
-       G_fAngle_horizon=0;
-   if(-20<G_fAngle_vertical||G_fAngle_vertical<-160)
-      G_fAngle_vertical=90;
-    }
-			if(G_fDistance<10)
-				G_fDistance += 0.3f;
-			break;
-		case 'E':	
-			 if(G_fDistance>3)
-	  {
-         if(250>G_fAngle_horizon&&G_fAngle_horizon>100.0)   //ÊÕËõÊ±µ÷Õû½Ç¶È
-          G_fAngle_horizon=0;
-         if(-20>G_fAngle_vertical&&G_fAngle_vertical>-160)
-		   G_fAngle_vertical=-90;
-	  }
-			if(G_fDistance<10)
-			G_fDistance += 0.3f;
-			break;
-		case 'A':	//×óÓÒ
-			G_RLDistance -= 0.3f;
-			break;
-		case 'a':		
-			G_RLDistance -= 0.3f;
-			break;
-		case 'D':	
-			G_RLDistance += 0.3f;
-			break;
-		case 'd':		
-			G_RLDistance += 0.3f;
-			break;
-		case 'S':	//ÉÏÏÂ
-			G_UDDistance -= 0.3f;
-			break;
-		case 's':		
-			G_UDDistance -= 0.3f;
-			break;
-		case 'w':	
-			G_UDDistance += 0.3f;
-			break;
-		case 'W':		
-			G_UDDistance += 0.3f;
-			break;
-		case 'z':	//·Å´óËõĞ¡
-			G_scale += 0.1f;
-			break;
-		case 'Z':	
-			G_scale += 0.1f;
-			break;
-		case 'x':	
-			G_scale -= 0.1f;
-			break;
-		case 'X':	
-			G_scale -= 0.1f;
-			break;
-		case 27:	//"esc"
-			exit(0);
+	switch (key)
+	{ // ä¸Šä¸‹å·¦å³æ—‹è½¬
+	case GLUT_KEY_LEFT:
+		// if(G_fAngle_horizon>100.0)
+		G_fAngle_horizon -= 10.0f;
+		break;
+	case GLUT_KEY_RIGHT:
+		// if(G_fAngle_horizon<250.0)
+		G_fAngle_horizon += 10.0f;
+		break;
+	case GLUT_KEY_UP:
+		// if(G_fAngle_vertical>-160.0)
+		G_fAngle_vertical -= 10.0f;
+		break;
+	case GLUT_KEY_DOWN:
+		// if(G_fAngle_vertical<20.0)
+		G_fAngle_vertical += 10.0f;
+		break;
 	}
 	glutPostRedisplay();
 }
 
+void processNormalKeys(unsigned char key, int x, int y)
+{
+	if (G_fDistance < 3)
+	{
+		if (250 > G_fAngle_horizon && G_fAngle_horizon > 100.0)
+			G_fAngle_horizon = 0;
+		if (-20 > G_fAngle_vertical && G_fAngle_vertical > -160)
+			G_fAngle_vertical = 90;
+	}
+	switch (key)
+	{
+	case 'q': // è¿œè¿‘
+		if (G_fDistance > -0.6)
+			G_fDistance -= 0.3f;
+		break;
+	case 'Q':
+		if (G_fDistance > -0.6)
+			G_fDistance -= 0.3f;
+		break;
+	case 'e':
+		if (G_fDistance > 3)
+		{
+			if (250 < G_fAngle_horizon || G_fAngle_horizon < 100.0)
+				G_fAngle_horizon = 0;
+			if (-20 < G_fAngle_vertical || G_fAngle_vertical < -160)
+				G_fAngle_vertical = 90;
+		}
+		if (G_fDistance < 10)
+			G_fDistance += 0.3f;
+		break;
+	case 'E':
+		if (G_fDistance > 3)
+		{
+			if (250 > G_fAngle_horizon && G_fAngle_horizon > 100.0) // æ”¶ç¼©æ—¶è°ƒæ•´è§’åº¦
+				G_fAngle_horizon = 0;
+			if (-20 > G_fAngle_vertical && G_fAngle_vertical > -160)
+				G_fAngle_vertical = -90;
+		}
+		if (G_fDistance < 10)
+			G_fDistance += 0.3f;
+		break;
+	case 'A': // å·¦å³
+		G_RLDistance -= 0.3f;
+		break;
+	case 'a':
+		G_RLDistance -= 0.3f;
+		break;
+	case 'D':
+		G_RLDistance += 0.3f;
+		break;
+	case 'd':
+		G_RLDistance += 0.3f;
+		break;
+	case 'S': // ä¸Šä¸‹
+		G_UDDistance -= 0.3f;
+		break;
+	case 's':
+		G_UDDistance -= 0.3f;
+		break;
+	case 'w':
+		G_UDDistance += 0.3f;
+		break;
+	case 'W':
+		G_UDDistance += 0.3f;
+		break;
+	case 'z': // æ”¾å¤§ç¼©å°
+		G_scale += 0.1f;
+		break;
+	case 'Z':
+		G_scale += 0.1f;
+		break;
+	case 'x':
+		G_scale -= 0.1f;
+		break;
+	case 'X':
+		G_scale -= 0.1f;
+		break;
+	case 27: //"esc"
+		exit(0);
+	}
+	glutPostRedisplay();
+}
 
-
-/*ÔÚOpenGLÕû¸ö³ÌĞòµÄ³õÊ¼»¯½×¶Î£¨Ò»°ãÊÇinit()º¯Êı£©£¬×öÒÔÏÂ¹¤×÷¡£
-1¡¢¶¥µã×ÅÉ«³ÌĞòµÄÔ´´úÂëºÍÆ¬¶Î×÷É«³ÌĞòµÄÔ´´úÂëÒª·Ö±ğ±£´æµ½Ò»¸ö×Ö·ûÊı×éÀïÃæ£»
-2¡¢Ê¹ÓÃglCreateshader()·Ö±ğ´´½¨Ò»¸ö¶¥µã×ÅÉ«Æ÷¶ÔÏóºÍÒ»¸öÆ¬¶Î×ÅÉ«Æ÷¶ÔÏó£»
-3¡¢Ê¹ÓÃglShaderSource()·Ö±ğ½«¶¥µã×ÅÉ«³ÌĞòµÄÔ´´úÂë×Ö·ûÊı×é°ó¶¨µ½¶¥µã×ÅÉ«Æ÷¶ÔÏó£¬½«Æ¬¶Î×ÅÉ«³ÌĞòµÄÔ´´úÂë×Ö·ûÊı×é°ó¶¨µ½Æ¬¶Î×ÅÉ«Æ÷¶ÔÏó£»
-4¡¢Ê¹ÓÃglCompileShader()·Ö±ğ±àÒë¶¥µã×ÅÉ«Æ÷¶ÔÏóºÍÆ¬¶Î×ÅÉ«Æ÷¶ÔÏó£»
-5¡¢Ê¹ÓÃglCreaterProgram()´´½¨Ò»¸ö£¨×ÅÉ«£©³ÌĞò¶ÔÏó£»
-6¡¢Ê¹ÓÃglAttachShader()·Ö±ğ½«¶¥µã×ÅÉ«Æ÷¶ÔÏóºÍÆ¬¶Î×ÅÉ«Æ÷¶ÔÏó¸½¼Óµ½£¨×ÅÉ«£©³ÌĞò¶ÔÏóÉÏ£»
-7¡¢Ê¹ÓÃglLinkProgram()¶Ô£¨×ÅÉ«£©³ÌĞò¶ÔÏóÖ´ĞĞÁ´½Ó²Ù×÷
-8¡¢Ê¹ÓÃglValidateProgram()¶Ô£¨×ÅÉ«£©³ÌĞò¶ÔÏó½øĞĞÕıÈ·ĞÔÑéÖ¤
-9¡¢×îºóÊ¹ÓÃglUseProgram()½«OpenGLäÖÈ¾¹ÜµÀÇĞ»»µ½×ÅÉ«Æ÷Ä£Ê½£¬²¢Ê¹ÓÃ¸Õ²Å×öºÃµÄ£¨×ÅÉ«£©³ÌĞò¶ÔÏó¡£
-È»ºó£¬²Å¿ÉÒÔÌá½»¶¥µã¡£
+/*åœ¨OpenGLæ•´ä¸ªç¨‹åºçš„åˆå§‹åŒ–é˜¶æ®µï¼ˆä¸€èˆ¬æ˜¯init()å‡½æ•°ï¼‰ï¼Œåšä»¥ä¸‹å·¥ä½œã€‚
+1ã€é¡¶ç‚¹ç€è‰²ç¨‹åºçš„æºä»£ç å’Œç‰‡æ®µä½œè‰²ç¨‹åºçš„æºä»£ç è¦åˆ†åˆ«ä¿å­˜åˆ°ä¸€ä¸ªå­—ç¬¦æ•°ç»„é‡Œé¢ï¼›
+2ã€ä½¿ç”¨glCreateshader()åˆ†åˆ«åˆ›å»ºä¸€ä¸ªé¡¶ç‚¹ç€è‰²å™¨å¯¹è±¡å’Œä¸€ä¸ªç‰‡æ®µç€è‰²å™¨å¯¹è±¡ï¼›
+3ã€ä½¿ç”¨glShaderSource()åˆ†åˆ«å°†é¡¶ç‚¹ç€è‰²ç¨‹åºçš„æºä»£ç å­—ç¬¦æ•°ç»„ç»‘å®šåˆ°é¡¶ç‚¹ç€è‰²å™¨å¯¹è±¡ï¼Œå°†ç‰‡æ®µç€è‰²ç¨‹åºçš„æºä»£ç å­—ç¬¦æ•°ç»„ç»‘å®šåˆ°ç‰‡æ®µç€è‰²å™¨å¯¹è±¡ï¼›
+4ã€ä½¿ç”¨glCompileShader()åˆ†åˆ«ç¼–è¯‘é¡¶ç‚¹ç€è‰²å™¨å¯¹è±¡å’Œç‰‡æ®µç€è‰²å™¨å¯¹è±¡ï¼›
+5ã€ä½¿ç”¨glCreaterProgram()åˆ›å»ºä¸€ä¸ªï¼ˆç€è‰²ï¼‰ç¨‹åºå¯¹è±¡ï¼›
+6ã€ä½¿ç”¨glAttachShader()åˆ†åˆ«å°†é¡¶ç‚¹ç€è‰²å™¨å¯¹è±¡å’Œç‰‡æ®µç€è‰²å™¨å¯¹è±¡é™„åŠ åˆ°ï¼ˆç€è‰²ï¼‰ç¨‹åºå¯¹è±¡ä¸Šï¼›
+7ã€ä½¿ç”¨glLinkProgram()å¯¹ï¼ˆç€è‰²ï¼‰ç¨‹åºå¯¹è±¡æ‰§è¡Œé“¾æ¥æ“ä½œ
+8ã€ä½¿ç”¨glValidateProgram()å¯¹ï¼ˆç€è‰²ï¼‰ç¨‹åºå¯¹è±¡è¿›è¡Œæ­£ç¡®æ€§éªŒè¯
+9ã€æœ€åä½¿ç”¨glUseProgram()å°†OpenGLæ¸²æŸ“ç®¡é“åˆ‡æ¢åˆ°ç€è‰²å™¨æ¨¡å¼ï¼Œå¹¶ä½¿ç”¨åˆšæ‰åšå¥½çš„ï¼ˆç€è‰²ï¼‰ç¨‹åºå¯¹è±¡ã€‚
+ç„¶åï¼Œæ‰å¯ä»¥æäº¤é¡¶ç‚¹ã€‚
 */
 void setShaders(void)
-{  
-	char *vs,*fs; 
-	vs = textFileRead("Shader/eye.vert");  
-	fs = textFileRead("Shader/eye.frag");  
-	const char *vv = vs;  
-	const char *ff = fs;  
+{
+	char *vs, *fs;
+	vs = textFileRead("Shader/eye.vert");
+	fs = textFileRead("Shader/eye.frag");
+	const char *vv = vs;
+	const char *ff = fs;
 
-	G_vShader_simple = glCreateShader(GL_VERTEX_SHADER);  //½¨Á¢ vertex_shader
-	G_fShader_simple = glCreateShader(GL_FRAGMENT_SHADER); //½¨Á¢ fragment_shader
-    glShaderSource(G_vShader_simple, 1, &vv, NULL);  //·Ö±ğ½«¶¥µã×ÅÉ«³ÌĞòµÄÔ´´úÂë×Ö·ûÊı×é°ó¶¨µ½¶¥µã×ÅÉ«Æ÷¶ÔÏó£¬½«Æ¬¶Î×ÅÉ«³ÌĞòµÄÔ´´úÂë×Ö·ûÊı×é°ó¶¨µ½Æ¬¶Î×ÅÉ«Æ÷¶ÔÏó£»
-	glShaderSource(G_fShader_simple, 1, &ff, NULL);  
+	G_vShader_simple = glCreateShader(GL_VERTEX_SHADER);   // å»ºç«‹ vertex_shader
+	G_fShader_simple = glCreateShader(GL_FRAGMENT_SHADER); // å»ºç«‹ fragment_shader
+	glShaderSource(G_vShader_simple, 1, &vv, NULL);		   // åˆ†åˆ«å°†é¡¶ç‚¹ç€è‰²ç¨‹åºçš„æºä»£ç å­—ç¬¦æ•°ç»„ç»‘å®šåˆ°é¡¶ç‚¹ç€è‰²å™¨å¯¹è±¡ï¼Œå°†ç‰‡æ®µç€è‰²ç¨‹åºçš„æºä»£ç å­—ç¬¦æ•°ç»„ç»‘å®šåˆ°ç‰‡æ®µç€è‰²å™¨å¯¹è±¡ï¼›
+	glShaderSource(G_fShader_simple, 1, &ff, NULL);
 
 	free(vs);
 	free(fs);
 	/////////////////////////////////////////////////////////
-	glCompileShader(G_vShader_simple); //·Ö±ğ±àÒë¶¥µã×ÅÉ«Æ÷¶ÔÏóºÍÆ¬¶Î×ÅÉ«Æ÷¶ÔÏó£» 
-	glCompileShader(G_fShader_simple);  
+	glCompileShader(G_vShader_simple); // åˆ†åˆ«ç¼–è¯‘é¡¶ç‚¹ç€è‰²å™¨å¯¹è±¡å’Œç‰‡æ®µç€è‰²å™¨å¯¹è±¡ï¼›
+	glCompileShader(G_fShader_simple);
 	int checkResult;
-	glGetShaderiv(G_vShader_simple, GL_COMPILE_STATUS, &checkResult);  
-	if(GL_FALSE == checkResult)
+	glGetShaderiv(G_vShader_simple, GL_COMPILE_STATUS, &checkResult);
+	if (GL_FALSE == checkResult)
 	{
 		printf("vertex shader compile error\n");
 		printShaderInfoLog(G_vShader_simple);
 	}
-	glGetShaderiv(G_fShader_simple, GL_COMPILE_STATUS, &checkResult);  
-	if(GL_FALSE == checkResult)
+	glGetShaderiv(G_fShader_simple, GL_COMPILE_STATUS, &checkResult);
+	if (GL_FALSE == checkResult)
 	{
 		printf("fragment shader compile error\n");
 		printShaderInfoLog(G_fShader_simple);
 	}
 	////////////////////////////////////////////////////////////
-	G_shaderProgram = glCreateProgram(); 
-	glAttachShader(G_shaderProgram, G_vShader_simple);  //·Ö±ğ½«¶¥µã×ÅÉ«Æ÷¶ÔÏóºÍÆ¬¶Î×ÅÉ«Æ÷¶ÔÏó¸½¼Óµ½£¨×ÅÉ«£©³ÌĞò¶ÔÏóÉÏ£»
-	glAttachShader(G_shaderProgram, G_fShader_simple); 
-	glLinkProgram(G_shaderProgram);  
-	glGetProgramiv(G_fShader_simple, GL_LINK_STATUS, &checkResult);  
-	if(GL_FALSE == checkResult)
+	G_shaderProgram = glCreateProgram();
+	glAttachShader(G_shaderProgram, G_vShader_simple); // åˆ†åˆ«å°†é¡¶ç‚¹ç€è‰²å™¨å¯¹è±¡å’Œç‰‡æ®µç€è‰²å™¨å¯¹è±¡é™„åŠ åˆ°ï¼ˆç€è‰²ï¼‰ç¨‹åºå¯¹è±¡ä¸Šï¼›
+	glAttachShader(G_shaderProgram, G_fShader_simple);
+	glLinkProgram(G_shaderProgram);
+	glGetProgramiv(G_fShader_simple, GL_LINK_STATUS, &checkResult);
+	if (GL_FALSE == checkResult)
 	{
 		printf("shader link error\n");
 		printProgramInfoLog(G_shaderProgram);
 	}
-}  
+}
 
-char* textFileRead(const char *textFileName)
+char *textFileRead(const char *textFileName)
 {
 	FILE *fp;
-    if(NULL == (fp = fopen(textFileName, "r")))  
-    {  
-        printf("text file read error\n");  
-		exit(1);  
-    }  
-  
-    char ch;
-	int fileLen = 0;
-	//Ê×ÏÈµÃµ½ÎÄ¼ş³¤¶È
-	while(EOF != (ch=fgetc(fp)))  
-    {  
-        fileLen ++;  
-    }
+	if (NULL == (fp = fopen(textFileName, "r")))
+	{
+		printf("text file read error\n");
+		exit(1);
+	}
 
-	char *fileStr = (char *)malloc((fileLen+1)*sizeof(char));
-	//µÚ¶ş´Î¶ÁÈ¡ÎÄ¼ş
+	char ch;
+	int fileLen = 0;
+	// é¦–å…ˆå¾—åˆ°æ–‡ä»¶é•¿åº¦
+	while (EOF != (ch = fgetc(fp)))
+	{
+		fileLen++;
+	}
+
+	char *fileStr = (char *)malloc((fileLen + 1) * sizeof(char));
+	// ç¬¬äºŒæ¬¡è¯»å–æ–‡ä»¶
 	rewind(fp);
 	int i = 0;
-    while(EOF != (ch=fgetc(fp)))  
-    {  
-        fileStr[i] = ch;
+	while (EOF != (ch = fgetc(fp)))
+	{
+		fileStr[i] = ch;
 		i++;
-    }  
-	fileStr[fileLen] = '\0';	//×¢ÒâÕâ¸öÒ»¶¨Òª¼Ó¡£
-  
-    fclose(fp);
+	}
+	fileStr[fileLen] = '\0'; // æ³¨æ„è¿™ä¸ªä¸€å®šè¦åŠ ã€‚
+
+	fclose(fp);
 	return fileStr;
 }
 
@@ -537,18 +535,18 @@ void printShaderInfoLog(GLuint shaderObject)
 {
 	GLint logLen = 0;
 	GLint writtenLen = 0;
-	GLchar* info_log;
+	GLchar *info_log;
 
-	glGetShaderiv(shaderObject, GL_INFO_LOG_LENGTH , &logLen);       
+	glGetShaderiv(shaderObject, GL_INFO_LOG_LENGTH, &logLen);
 
 	if (logLen > 1)
 	{
-		info_log = (GLchar*)malloc(logLen);
-//		glGetInfoLogARB(shaderObject, logLen, &writtenLen, info_log);	//Ò²ĞíÕâÊÇÀÏ°æ±¾µÄº¯ÊıÁË¡£
-		glGetShaderInfoLog(shaderObject, logLen, &writtenLen, info_log);  
-//		printf("Information log: \n");
+		info_log = (GLchar *)malloc(logLen);
+		//		glGetInfoLogARB(shaderObject, logLen, &writtenLen, info_log);	//ä¹Ÿè®¸è¿™æ˜¯è€ç‰ˆæœ¬çš„å‡½æ•°äº†ã€‚
+		glGetShaderInfoLog(shaderObject, logLen, &writtenLen, info_log);
+		//		printf("Information log: \n");
 		printf("%s\n", info_log);
-		free (info_log);
+		free(info_log);
 	}
 }
 
@@ -556,17 +554,17 @@ void printProgramInfoLog(GLuint programObject)
 {
 	GLint logLen = 0;
 	GLint writtenLen = 0;
-	GLchar* info_log;
+	GLchar *info_log;
 
-	glGetShaderiv(programObject, GL_INFO_LOG_LENGTH , &logLen);       
+	glGetShaderiv(programObject, GL_INFO_LOG_LENGTH, &logLen);
 
 	if (logLen > 1)
 	{
-		info_log = (GLchar*)malloc(logLen);
-//		glGetInfoLogARB(shaderObject, logLen, &writtenLen, info_log);
-		glGetProgramInfoLog(programObject, logLen, &writtenLen, info_log);  
-//		printf("Information log: \n");
+		info_log = (GLchar *)malloc(logLen);
+		//		glGetInfoLogARB(shaderObject, logLen, &writtenLen, info_log);
+		glGetProgramInfoLog(programObject, logLen, &writtenLen, info_log);
+		//		printf("Information log: \n");
 		printf("%s\n", info_log);
-		free (info_log);
+		free(info_log);
 	}
 }
